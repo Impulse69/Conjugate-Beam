@@ -1,0 +1,85 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def calculate_reactions(load, load_type, span, support_type):
+    # For simplicity, let's assume a simply supported beam with a point load at the center
+    if load_type == 'point' and support_type == 'simply_supported':
+        R1 = load / 2
+        R2 = load / 2
+    else:
+        raise NotImplementedError("Only simply supported beams with point loads are implemented.")
+    return R1, R2
+
+def calculate_shear_force(load, load_type, span, support_type, R1, R2):
+    x = np.linspace(0, span, 1000)
+    V = np.zeros_like(x)
+    
+    if load_type == 'point' and support_type == 'simply_supported':
+        for i in range(len(x)):
+            if x[i] < span / 2:
+                V[i] = R1
+            else:
+                V[i] = R1 - load
+    else:
+        raise NotImplementedError("Only simply supported beams with point loads are implemented.")
+    
+    return x, V
+
+def calculate_bending_moment(load, load_type, span, support_type, R1, R2):
+    x = np.linspace(0, span, 1000)
+    M = np.zeros_like(x)
+    
+    if load_type == 'point' and support_type == 'simply_supported':
+        for i in range(len(x)):
+            if x[i] < span / 2:
+                M[i] = R1 * x[i]
+            else:
+                M[i] = R1 * x[i] - load * (x[i] - span / 2)
+    else:
+        raise NotImplementedError("Only simply supported beams with point loads are implemented.")
+    
+    return x, M
+
+def plot_diagrams(x, V, M):
+    plt.figure(facecolor='white')
+    
+    plt.subplot(2, 1, 1)
+    plt.plot(x, V, label='Shear Force')
+    plt.xlabel('Position along the beam (m)')
+    plt.ylabel('Shear Force (N)')
+    plt.title('Shear Force Diagram')
+    plt.grid(True)
+    plt.legend()
+    
+    plt.subplot(2, 1, 2)
+    plt.plot(x, M, label='Bending Moment', color='r')
+    plt.xlabel('Position along the beam (m)')
+    plt.ylabel('Bending Moment (Nm)')
+    plt.title('Bending Moment Diagram')
+    plt.grid(True)
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
+
+def main():
+    # Input parameters
+    load = 1000  # N
+    load_type = 'point'
+    span = 10  # m
+    support_type = 'simply_supported'
+    
+    # Calculate reactions
+    R1, R2 = calculate_reactions(load, load_type, span, support_type)
+    
+    # Calculate shear force
+    x, V = calculate_shear_force(load, load_type, span, support_type, R1, R2)
+    
+    # Calculate bending moment
+    x, M = calculate_bending_moment(load, load_type, span, support_type, R1, R2)
+    
+    # Plot diagrams
+    plot_diagrams(x, V, M)
+
+if __name__ == "__main__":
+    main()
