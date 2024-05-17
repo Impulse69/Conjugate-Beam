@@ -1,85 +1,171 @@
+import tkinter as tk
+from tkinter import *
+from tkinter import ttk
+from matplotlib import pyplot as plt
 import numpy as np
-import matplotlib.pyplot as plt
 
-def calculate_reactions(load, load_type, span, support_type):
-    # For simplicity, let's assume a simply supported beam with a point load at the center
-    if load_type == 'point' and support_type == 'simply_supported':
-        R1 = load / 2
-        R2 = load / 2
-    else:
-        raise NotImplementedError("Only simply supported beams with point loads are implemented.")
-    return R1, R2
+root = Tk()
+root.title('3 Moment Method Project')
+menuBar = tk.Menu(root)
+root.config(bg="white", menu=menuBar)
+root.geometry("600x650")
 
-def calculate_shear_force(load, load_type, span, support_type, R1, R2):
-    x = np.linspace(0, span, 1000)
-    V = np.zeros_like(x)
-    
-    if load_type == 'point' and support_type == 'simply_supported':
-        for i in range(len(x)):
-            if x[i] < span / 2:
-                V[i] = R1
+def New():
+    l1 = Label(root, text="Moment And Shear Force Calculator", font=5)
+    l1.place(relx=0.30, rely=0.05)
+    l1 = Label(root, text="Span A-B (m):", font=5)
+    l1.place(relx=0.10, rely=0.15)
+    l1 = Label(root, text="Span B-C (m):", font=5)
+    l1.place(relx=0.10, rely=0.25)
+    l1 = Label(root, text="Span C-D (m):", font=5)
+    l1.place(relx=0.10, rely=0.35)
+
+    # Length of span a
+    ABa = IntVar()
+    BCa = IntVar()
+    CDa = IntVar()
+    AB = IntVar()
+    BC = IntVar()
+    CD = IntVar()
+    ABLoad = IntVar()
+    BCLoad = IntVar()
+    CDLoad = IntVar()
+
+    e1 = Entry(root, width=10, textvariable=ABa, font=5)
+    e1.place(relx=0.50, rely=0.15)
+    e2 = Entry(root, width=10, textvariable=BCa, font=5)
+    e2.place(relx=0.50, rely=0.25)
+    e3 = Entry(root, width=10, textvariable=CDa, font=5)
+    e3.place(relx=0.50, rely=0.35)
+    e4 = Entry(root, width=10, textvariable=AB, font=5)
+    e4.place(relx=0.30, rely=0.15)
+    e5 = Entry(root, width=10, textvariable=BC, font=5)
+    e5.place(relx=0.30, rely=0.25)
+    e6 = Entry(root, width=10, textvariable=CD, font=5)
+    e6.place(relx=0.30, rely=0.35)
+
+    # Load labels & entries
+    l1 = Label(root, text="Load on A-B (KN):", font=5)
+    l1.place(relx=0.10, rely=0.45)
+    l1 = Label(root, text="Load on B-C (KN):", font=5)
+    l1.place(relx=0.10, rely=0.55)
+    l1 = Label(root, text="Load on C-D (KN):", font=5)
+    l1.place(relx=0.10, rely=0.65)
+    e7 = Entry(root, width=10, textvariable=ABLoad, font=5)
+    e7.place(relx=0.35, rely=0.45)
+    e8 = Entry(root, width=10, textvariable=BCLoad, font=5)
+    e8.place(relx=0.35, rely=0.55)
+    e9 = Entry(root, width=10, textvariable=CDLoad, font=5)
+    e9.place(relx=0.35, rely=0.65)
+
+    # Type of load
+    elements = ["Point Load", "Uniformly Distributed Load"]
+    l1 = Label(root, text="Type of Load")
+    l1.place(relx=0.70, rely=0.35)
+    optionsAB = ttk.Combobox(root, values=elements)
+    optionsAB.current(0)
+    optionsAB.place(relx=0.70, rely=0.45)
+    optionsBC = ttk.Combobox(root, values=elements)
+    optionsBC.current(0)
+    optionsBC.place(relx=0.70, rely=0.55)
+    optionsCD = ttk.Combobox(root, values=elements)
+    optionsCD.current(0)
+    optionsCD.place(relx=0.70, rely=0.65)
+
+    # Computations function
+    def calculations():
+        # Getting the entries of the loads, spans and distance a from the left.
+        SpanAB = int(AB.get())
+        SpanBC = int(BC.get())
+        SpanCD = int(CD.get())
+        ABalength = int(ABa.get())
+        BCalength = int(BCa.get())
+        CDalength = int(CDa.get())
+        optionz1 = optionsAB.get()
+        optionz2 = optionsBC.get()
+        optionz3 = optionsCD.get()
+        span1load = ABLoad.get()
+        span2load = BCLoad.get()
+        span3load = CDLoad.get()
+        lengthb1 = SpanAB - ABalength
+        lengthb2 = SpanBC - BCalength
+        lengthb3 = SpanCD - CDalength
+
+        # Bending Moment Calculations
+        if optionz1 == "Point Load":
+            lengthb1 = SpanAB - ABalength
+            if lengthb1 == SpanAB / 2:
+                Moment1a = (span1load * SpanAB) / 4
+                Moment1 = "The value of the moment for span AB is " + str(Moment1a) + " KNm"
             else:
-                V[i] = R1 - load
-    else:
-        raise NotImplementedError("Only simply supported beams with point loads are implemented.")
-    
-    return x, V
+                Moment1a = (span1load * ABalength * lengthb1) / SpanAB
+                Moment1 = "The value of the moment for span AB is " + str(Moment1a) + " KNm"
+        else:
+            Moment1a = (span1load * SpanAB * SpanAB) / 8
+            Moment1 = "The value of the moment for span AB is " + str(Moment1a) + " KNm"
 
-def calculate_bending_moment(load, load_type, span, support_type, R1, R2):
-    x = np.linspace(0, span, 1000)
-    M = np.zeros_like(x)
-    
-    if load_type == 'point' and support_type == 'simply_supported':
-        for i in range(len(x)):
-            if x[i] < span / 2:
-                M[i] = R1 * x[i]
+        if optionz2 == "Point Load":
+            lengthb2 = SpanBC - BCalength
+            if lengthb2 == SpanBC / 2:
+                Moment2a = (span2load * SpanBC) / 4
+                Moment2 = "The value of the moment for span BC is " + str(Moment2a) + " KNm"
             else:
-                M[i] = R1 * x[i] - load * (x[i] - span / 2)
-    else:
-        raise NotImplementedError("Only simply supported beams with point loads are implemented.")
-    
-    return x, M
+                Moment2a = (span2load * BCalength * lengthb2) / SpanBC
+                Moment2 = "The value of the moment for span BC is " + str(Moment2a) + " KNm"
+        else:
+            Moment2a = (span2load * SpanBC * SpanBC) / 8
+            Moment2 = "The value of the moment for span BC is " + str(Moment2a) + " KNm"
 
-def plot_diagrams(x, V, M):
-    plt.figure(facecolor='white')
-    
-    plt.subplot(2, 1, 1)
-    plt.plot(x, V, label='Shear Force')
-    plt.xlabel('Position along the beam (m)')
-    plt.ylabel('Shear Force (N)')
-    plt.title('Shear Force Diagram')
-    plt.grid(True)
-    plt.legend()
-    
-    plt.subplot(2, 1, 2)
-    plt.plot(x, M, label='Bending Moment', color='r')
-    plt.xlabel('Position along the beam (m)')
-    plt.ylabel('Bending Moment (Nm)')
-    plt.title('Bending Moment Diagram')
-    plt.grid(True)
-    plt.legend()
-    
-    plt.tight_layout()
-    plt.show()
+        if optionz3 == "Point Load":
+            lengthb3 = SpanCD - CDalength
+            if lengthb3 == SpanCD / 2:
+                Moment3a = (span3load * SpanCD) / 4
+                Moment3 = "The value of the moment for span CD is " + str(Moment3a) + " KNm"
+            else:
+                Moment3a = (span3load * CDalength * lengthb3) / SpanCD
+                Moment3 = "The value of the moment for span CD is " + str(Moment3a) + " KNm"
+        else:
+            Moment3a = (span3load * SpanCD * SpanCD) / 8
+            Moment3 = "The value of the moment for span CD is " + str(Moment3a) + " KNm"
 
-def main():
-    # Input parameters
-    load = 1000  # N
-    load_type = 'point'
-    span = 10  # m
-    support_type = 'simply_supported'
-    
-    # Calculate reactions
-    R1, R2 = calculate_reactions(load, load_type, span, support_type)
-    
-    # Calculate shear force
-    x, V = calculate_shear_force(load, load_type, span, support_type, R1, R2)
-    
-    # Calculate bending moment
-    x, M = calculate_bending_moment(load, load_type, span, support_type, R1, R2)
-    
-    # Plot diagrams
-    plot_diagrams(x, V, M)
+        fig, ax1 = plt.subplots(figsize=(10, 5))
 
-if __name__ == "__main__":
-    main()
+        # Plot Bending Moment Diagram
+        x_AB = np.linspace(0, SpanAB, 100)
+        y_AB = -Moment1a * (x_AB - SpanAB / 2)**2 + Moment1a * (SpanAB / 2)**2
+        ax1.plot(x_AB, y_AB, label='Span AB')
+
+        x_BC = np.linspace(SpanAB, SpanAB + SpanBC, 100)
+        y_BC = -Moment2a * (x_BC - SpanAB - SpanBC / 2)**2 + Moment2a * (SpanBC / 2)**2
+        ax1.plot(x_BC, y_BC, label='Span BC')
+
+        x_CD = np.linspace(SpanAB + SpanBC, SpanAB + SpanBC + SpanCD, 100)
+        y_CD = -Moment3a * (x_CD - SpanAB - SpanBC - SpanCD / 2)**2 + Moment3a * (SpanCD / 2)**2
+        ax1.plot(x_CD, y_CD, label='Span CD')
+
+        ax1.set_title('Bending Moment Diagram')
+        ax1.set_xlabel('Distance (m)')
+        ax1.set_ylabel('Bending Moment (KNm)')
+        ax1.legend()
+
+        plt.tight_layout()
+        plt.show()
+
+        l5 = Label(root, text=Moment1)
+        l5.place(relx=0.25, rely=0.85)
+        l6 = Label(root, text=Moment2)
+        l6.place(relx=0.45, rely=0.85)
+        l7 = Label(root, text=Moment3)
+        l7.place(relx=0.65, rely=0.85)
+
+    computeButton = Button(root, text="Compute", command=calculations)
+    computeButton.place(relx=0.45, rely=0.75)
+
+# File Menu
+fileMenu = tk.Menu(menuBar, tearoff=0)
+fileMenu.add_command(label='New', command=New)
+fileMenu.add_separator()
+fileMenu.add_command(label='Exit', command=root.quit)
+menuBar.add_cascade(label='File', menu=fileMenu)
+
+root.mainloop()
